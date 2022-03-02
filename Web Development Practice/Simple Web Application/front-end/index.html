@@ -1,0 +1,91 @@
+<html lang="en">
+  <meta>
+    <meta charset="UTF-8">
+    <title>Weather Detector</title>
+  </meta>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <div id="weather-app">
+      <div id="header-container">
+        <h1 id="header-text">Weather Detector</h1>
+      </div>
+      <div id="input-container">
+        <label for="fname" id="input-label">Enter the name of a city</label>
+        <input type="text" id="input-text" v-model="cityName">
+        <br>
+      </div>
+      <div id="button-container">
+        <button id="fetch-button" v-on:click="fetchWeather(cityName)">Fetch Weather</button>
+      </div>
+      <template v-if="dataFetched" id="weather-container">
+        <div id="packing" style="padding: 10px; border: 0.5px solid black">
+          <b>Is there rain expected in the next 5 days?</b>
+          <div v-if="airPollutionResult">Yes, you should bring an umbrella</div>
+          <div v-else>No, you shouldn't bring an umbrella</div>
+        </div>
+        <div id="temp" style="padding: 10px; border: 0.5px solid black">
+          <b>What weather should you pack for?</b>
+          <div>{{temperatureToPackFor}} weather</div>
+        </div>
+        <div id="summary-table" style="padding: 10px; border: 0.5px solid black">
+          <b><u>Weather Summary Table</u></b>
+          <table>
+            <tr>
+              <th>Day</th>
+              <th>Temperature</th>
+              <th>Wind Speed</th>
+              <th>Rainfall Level</th>
+            </tr>
+            <tr v-for="(item, index) in summaryTable">
+              <td>{{index+1}}</td>
+              <td>{{item.temperature}}°C</td>
+              <td>{{item.windSpeed}}m/s</td>
+              <td v-if="item.rainfallLevel!==null">{{item.rainfallLevel}}mm</td>
+              <td v-else>N/A</td>
+            </tr>
+          </table> 
+        </div>
+        <div id="mask" style="padding: 10px; border: 0.5px solid black">
+          <b>Is a mask needed?</b>
+          <div v-if="airPollutionResult">Yes, average PM_25 for next 5 days is above 10</div>
+          <div v-else>No, average PM_25 for next 5 days is below 10</div>
+        </div>
+      </template >
+      <h1 v-else>Weather data not fetched yet.</h1>
+    </div>
+    <script>
+      var app = new Vue({
+        el:'#weather-app',
+        data:{
+          dataFetched: false,
+          cityName: "",
+          rainExpected: null,
+          temperatureToPackFor: null,
+          summaryTable: null,
+          airPollutionResult: null
+        },
+        methods:{
+          fetchWeather: fetchWeather,
+          setVariables: setVariables
+        }
+      })
+      function fetchWeather(cityName){
+        let prom = fetch("http://localhost:3000/getWeather/?city=" + cityName)
+        prom.then(response => response.json()).then(response =>{ 
+          rainExpected = response.weatherResult.rainExpected;
+          temperatureToPackFor = response.weatherResult.temperature;
+          summaryTable = response.weatherResult.summaryTable;
+          airPollutionResult = response.airPollutionResult;
+          setVariables(rainExpected, temperatureToPackFor, summaryTable, airPollutionResult)
+        })
+      }
+      function setVariables(rainExpected, temperatureToPackFor, summaryTable, airPollutionResult){
+        app.rainExpected = rainExpected;
+        app.temperatureToPackFor = temperatureToPackFor;
+        app.summaryTable = summaryTable;
+        app.airPollutionResult = airPollutionResult;
+        app.dataFetched = true;
+      }
+    </script>
+  </body>
+</html>

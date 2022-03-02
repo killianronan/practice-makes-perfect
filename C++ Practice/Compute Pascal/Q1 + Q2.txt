@@ -1,0 +1,78 @@
+add R0, #4, R1	; int inp_int = 4;
+public max5
+max5: 
+	add R0, R1, R10  ; inp_ut = arg0
+	add R0, R16, R11  ; i = arg1
+	add R0, R17, R12  ; j = arg2
+
+	callr R15, max  ; Call  relative
+	add R0, R1, R8  ; store result in r8
+	add R0, R1, R10  ; result = arg0
+	add R0, R18, R11  ; k = arg1
+	add R0, R19, R12  ; l = arg2
+	callr R15, max ;
+	ret r31, 0              ; jmp(&r31 + 0)
+    	xor r0, r0, r0          ; noop
+
+public max
+max:	add R0, R26, R16 ; int a
+	add R0, R27, R17 ; int b
+	add R0, R28, R18 ; int c
+	add R0, R16, R19 ; int v = a
+	sub R19, R17, R0, {C} ; if b>v
+	jle  M1
+    	xor r0, r0, r0	; nop
+	add R0, R27, R19; v = b
+M1:	sub R19, R18, R0, {C} ; if c>v
+	jle  M2
+    	xor r0, r0, r0	; noop
+	add R0, R28, R19; v = c
+M2:	add R0, R19, R1 ; return v
+	ret r31, 0              ; return
+    	xor r0, r0, r0          ; noop
+
+public fun
+fun:	add R0, R26, R16 ; int a
+	add R0, R27, R17 ; int b
+	add R0, #0, R28  ; 0
+	sub R28, R27, R0, {C} ; if b==0
+	jeq  finish
+    	xor r0, r0, r0   ; noop
+
+	add R0, R27, R10 ; int b = arg0
+	add R0, #2, R11  ; 2 = arg1
+	callr R15, divide; Call  divide
+	add R0, R1, R29  ;  store b/2 in R29
+	
+	add R0, R27, R10 ; int b
+	add R0, #2, R11  ; 2
+	callr R15, modulus; Call  modulus
+
+	sub R27, R1, R0, {C} ; if b%2 ==0
+	jeq  L2
+    	xor r0, r0, r0    ; noop
+
+	add R0, R29, R11  ; b/2 = arg1
+	add R16, R16, R26 ; a + a 
+	add R0, R26, R10  ; arg0 = a+a
+	callr R15, fun	  ;Call relative
+	add R0, #0, R30	;
+	sub R30, #0, R0, {C} ; jmp
+	jeq fin2
+    	xor r0, r0, r0    ; noop
+
+L1:	; call fun
+	add R0, R29, R11  ; b/2 = arg1
+	add R16, R16, R26 ; a + a 
+	add R0, R26, R10  ; arg0 = a+a
+	callr R15, fun ;Call relative
+	add R1, R16, R1  ; result + a
+	add R0, #0, R30	;
+	sub R30, #0, R0, {C} ; jmp
+	jeq fin2
+    	xor r0, r0, r0      ; noop
+finish:
+	add R0, #0, R1  ; return 0
+fin2:
+	ret R31, 0   	; return
+    	xor r0, r0, r0  ; noop

@@ -1,0 +1,23 @@
+It is an exercise in using Promela and SPIN to model the Jumping Frogs example found in the slides for Lecture 10.
+We have four frogs (`FROG1` to `FROG4`), with nos 1&2 moving right-to-left and nos 3&4 moving left-to-right. We have five positions, numbered 1 through 5.
+Initially, FROG1 and FROG2 are in positions 1 and 2, while FROG3 and FROG4 are in positions 4 and 5. Position 3 has no frog present in it.
+FROG1 and FROG2 can only move right, while FROG3 and FROG4 can only move left. A frog can only move if an empty location is next to it (in the appropriate direction), or reachable by jumping over one other frog.
+
+    Your task is to write a Promela model in file  "frogs.pml", that models this example, and which uses `printf` statements to produce output just like that shown below.
+    In addition, your Promela file should make it possible for a SPIN verification run to find a sequence of frog moves that leads to a desirable final state where frogs 1&2 and in positions 4&5 (in either order), and frogs3&4 are in positions 1&2 (again, in either order).
+    - See "Verifying Promela Models" in the HOWTOs content area.
+
+
+EMPTY 3, FROG1@1, FROG2@2, FROG3@4, FROG4@5
+FROG1 (RIGHT) STARTS AT 1
+FROG1 FROM 1 TO 3
+EMPTY 1, FROG1@3, FROG2@2, FROG3@4, FROG4@5
+FROG3 (LEFT) STARTS AT 4
+FROG2 (RIGHT) STARTS AT 2
+FROG4 (LEFT) STARTS AT 5
+...
+Note that different runs will have different frogs moving in different orders, and most runs will deadlock.
+The line starting with `EMPTY` shows which location has no frog,followed by the location of each of the four frogs (`FROGn@p` says that `FROG` *n* is at location *p*).
+The lines above containing `STARTS` should be printed for each frog, once only, before they make any moves.
+A line like those  containing `FROM` and `TO` above should be printed every time a frog makes a move, immediately followed by a line, like those above starting starting with `EMPTY`, that displays the current state of the system.
+REMEMBER - the output of printf statements in your model will be used to check the correctness of your model by an automated system. Please ensure you generate output in exactly the format shown above.

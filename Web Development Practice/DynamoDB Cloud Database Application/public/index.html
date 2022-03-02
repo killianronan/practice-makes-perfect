@@ -1,0 +1,123 @@
+<html lang="en">
+  <meta>
+    <meta charset="UTF-8">
+    <title>Simple Cloud Application</title>
+  </meta>
+  <style>
+    #moviesTable {
+      font-family: Arial, Helvetica;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    #moviesTable td, #moviesTable th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    #moviesTable tr:nth-child(even){background-color: #f2f2f2;}
+    #moviesTable tr:hover {background-color: #ddd;}
+    #moviesTable th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #04AA6D;
+      color: white;
+    }
+    </style>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <div id="weather-app">
+      <div id="header-container">
+        <h1 id="header-text">Cloud Application</h1>
+      </div>
+      <div style="width: 90%; display: flex; flex-direction: row; justify-content: space-between;">
+        <div id="button-container">
+          <button id="fetch-button" v-on:click="createDatabase()">Create Database</button>
+        </div>
+        <div id="button-container">
+          <button id="fetch-button" v-on:click="queryDatabase(year, name, rating)" style="margin-bottom: 10px;">Query Database</button>
+          <div id="input-container" style="display:flex; flex-direction:column;">
+            <label for="fname" id="input-label">Movie Name</label>
+            <input type="text" id="input-text" v-model="name" style="margin-bottom: 10px;">
+            <label for="fname" id="input-label">Year</label>
+            <input type="text" id="input-text" v-model="year" style="margin-bottom: 10px;">
+            <label for="fname" id="input-label">Rating</label>
+            <input type="text" id="input-text" v-model="rating">
+          </div>
+          <table v-if="dataFetched && movieTable!==null" id="moviesTable">
+            <tr>
+              <th>Title</th>
+              <th>Year</th>
+              <th>Actors</th>
+              <th>Directors</th>
+              <th>Rating</th>
+              <th>Release Date</th>
+            </tr>
+            <tr v-for="(item, index) in movieTable">
+              <td>{{item.title}}</td>
+              <td>{{item.year}}</td>
+              <td>
+                <ul v-for="(actor, actorIndex) in item.info.actors">
+                  <li>{{actor}}</li>
+                </ul>
+              </td>
+              <td>
+                {{item.info.directors[0]}}
+              </td>
+              <td>{{item.info.rating}}</td>
+              <td>{{item.info.release_date.substring(0, 10)}}</td>
+            </tr>
+          </table> 
+        </div>
+        <div id="button-container" style="float: right;">
+          <button id="fetch-button" v-on:click="destroyDatabase()">Destroy Database</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      var app = new Vue({
+        el:'#weather-app',
+        data:{
+          dataFetched: false,
+          name: "",
+          year: null,
+          rating: null,
+          movieTable: null
+        },
+        methods:{
+          createDatabase: createDatabase,
+          queryDatabase: queryDatabase,
+          destroyDatabase: destroyDatabase
+        }
+      })
+
+      function createDatabase(){
+        let prom = fetch("/createDatabase")
+        prom.then(response => response.json()).then(response =>{ 
+          alert(response.result)
+        })
+      }
+
+      function queryDatabase(year, name, rating){
+        if(year!=="" && year!==null && name!=="" && name!==null && rating!=="" && rating!==null){
+          let prom = fetch("/queryDatabase" + "?year="+year+"&name="+name+"&rating="+rating)
+          prom.then(response => response.json()).then(response =>{ 
+            if(response.result.length>0){
+              app.movieTable = response.result;
+              app.dataFetched = true;
+            }
+            else{
+              alert("No matches found.")
+            }
+          })
+        }
+      }  
+
+      function destroyDatabase(){
+        let prom = fetch("/destroyDatabase")
+        prom.then(response => response.json()).then(response =>{ 
+          alert(response.result)
+        })
+      }
+    </script>
+  </body>
+</html>
